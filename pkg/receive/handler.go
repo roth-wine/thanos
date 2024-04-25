@@ -85,6 +85,7 @@ type Options struct {
 	ReplicaHeader     string
 	Endpoint          string
 	ReplicationFactor uint64
+	SloppyQuorum      bool
 	ReceiverMode      ReceiverMode
 	Tracer            opentracing.Tracer
 	TLSConfig         *tls.Config
@@ -663,6 +664,9 @@ func (h *Handler) forward(ctx context.Context, tenant string, r replica, wreq *p
 
 // writeQuorum returns minimum number of replicas that has to confirm write success before claiming replication success.
 func (h *Handler) writeQuorum() int {
+	if h.options.SloppyQuorum {
+		return int(((h.options.ReplicationFactor - 1) / 2) + 1)
+	}
 	return int((h.options.ReplicationFactor / 2) + 1)
 }
 

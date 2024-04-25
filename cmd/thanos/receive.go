@@ -248,6 +248,7 @@ func runReceive(
 		ReplicationFactor: conf.replicationFactor,
 		RelabelConfigs:    relabelConfig,
 		ReceiverMode:      receiveMode,
+		SloppyQuorum:      conf.sloppyQuorum,
 		Tracer:            tracer,
 		TLSConfig:         rwTLSConfig,
 		DialOpts:          dialOpts,
@@ -791,6 +792,7 @@ type receiveConfig struct {
 	hashringsFilePath    string
 	hashringsFileContent string
 	hashringsAlgorithm   string
+	sloppyQuorum         bool
 
 	refreshInterval   *model.Duration
 	endpoint          string
@@ -892,6 +894,8 @@ func (rc *receiveConfig) registerFlag(cmd extkingpin.FlagClause) {
 	cmd.Flag("receive.grpc-compression", "Compression algorithm to use for gRPC requests to other receivers. Must be one of: "+compressionOptions).Default(snappy.Name).EnumVar(&rc.compression, snappy.Name, compressionNone)
 
 	cmd.Flag("receive.replication-factor", "How many times to replicate incoming write requests.").Default("1").Uint64Var(&rc.replicationFactor)
+
+	cmd.Flag("receive.sloppy-quorum", "Whether to use sloppy quorum for writes.").Default("false").BoolVar(&rc.sloppyQuorum)
 
 	rc.forwardTimeout = extkingpin.ModelDuration(cmd.Flag("receive-forward-timeout", "Timeout for each forward request.").Default("5s").Hidden())
 
